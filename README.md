@@ -2,6 +2,8 @@
 
 Responsive Hebrew insurance website built with React and Vite. The legacy purchase wizard is displayed inside the new site shell through a same-origin proxy so all purchase steps keep their session and remain embeddable.
 
+The app also includes a local information center at `/info` with the guides, policy summaries, customer-service information, company pages, terms, and accessibility content migrated from the legacy site.
+
 ## Local development
 
 ```bash

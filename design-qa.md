@@ -75,4 +75,25 @@ The new homepage emitted no app-origin warnings or errors. The proxied legacy if
 - Verified that `/wizard/process_data?step=1` now returns a local `/buy/step2?...` redirect and that subsequent redirects also remain local.
 - Production build passed and Sites packaging tests passed 4/4 after the routing fix.
 
+## Information-center expansion
+
+- Content source truth: the visible `main` content, headings, lists, links, and tables captured from 21 live routes on `https://insurance.lametayel.co.il/`; the extracted source data is stored in `src/data/content-1.json` and `src/data/content-2.json`.
+- Visual-system source truth: the existing approved new-site shell documented by `implementation-home-desktop.png` and `qa-home-desktop-comparison.png`.
+- Browser-rendered implementation evidence: `qa/info-viewport.png`, `qa/info-mobile.png`, `qa/family-viewport.png`, `qa/policy-table-visible.png`, and `qa/contact-desktop.png`.
+- Viewports: desktop 1280 × 720 CSS px and mobile 390 × 844 CSS px; device scale factor 1; no density normalization required.
+- State: information hub, family guide, contact options, policy table, and mobile navigation.
+- Full-view comparison: the information hub retains the approved orange top rule, RTL header, logo, Assistant typography, orange CTAs, dark teal support color, white editorial surfaces, and existing footer. The page structure is intentionally editorial rather than a visual clone of the legacy content pages.
+- Focused evidence: the policy table was checked in its scroll region, the contact cards were checked at desktop width, and the information-card grid and navigation were checked at 390 × 844.
+- Fonts and typography: local Assistant Regular/SemiBold/Bold remain the only interface fonts; Hebrew wrapping and heading hierarchy were verified across all routes.
+- Spacing and layout rhythm: desktop uses a readable article/sidebar layout; mobile collapses to one column with no page-level horizontal overflow.
+- Colors and visual tokens: existing orange, dark teal, off-white, blue, and gray tokens are reused consistently.
+- Image quality: no hotlinked imagery is required for the rendered information pages. Downloaded source assets remain local for future content iterations.
+- Copy and content: 21 legacy information/service routes were migrated. The obsolete COVID article is visibly marked as archive content, and policy pages carry a binding-terms notice.
+- Initial P2: the fixed service card covered the article table of contents on content pages.
+- Fix: the service card is hidden on information/content routes while remaining unchanged on the homepage.
+- Post-fix evidence: `qa/family-viewport.png` was rechecked semantically after the style update; the article and sidebar no longer have a competing fixed overlay.
+- Primary interactions tested: 21 information cards, all 22 local routes, mobile menu open/close, local breadcrumb/navigation links, phone/email/WhatsApp contact actions, app-store actions, purchase CTAs, and horizontally scrollable policy tables.
+- Console check: all 22 local routes emitted zero app-origin console errors.
+- Responsive check: all 22 routes had an H1 and footer, and none produced page-level horizontal overflow at 390 × 844.
+
 final result: passed

@@ -7,6 +7,7 @@ Before making substantial visual changes, use the Product Design plugin's `get-c
 ## Durable product decisions
 
 - The legacy purchase wizard must feel like a native page inside the new site shell. Show only the legacy form content; hide its header, introductory title block, support strip, cookie banner, and footer so those elements are not duplicated.
+- Informational content from the legacy insurance site should live on local routes inside the new site shell. Keep only transactional legacy systems as clearly labeled external or proxied destinations.
 
 When implementing from a selected generated mock, treat that image as the source of truth for layout, component anatomy, density, spacing, color, typography, visible content, and hierarchy.
 
