@@ -1,0 +1,44 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "npm run build:vercel",
+  "outputDirectory": "dist/client",
+  "functions": {
+    "api/legacy.js": {
+      "maxDuration": 30
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/legacy/:path*",
+      "destination": "/api/legacy?path=:path*"
+    },
+    {
+      "source": "/wizard",
+      "destination": "/api/legacy?path=wizard"
+    },
+    {
+      "source": "/wizard/:path*",
+      "destination": "/api/legacy?path=wizard/:path*"
+    },
+    {
+      "source": "/buy/step1",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/buy/:path*",
+      "destination": "/api/legacy?path=buy/:path*"
+    },
+    {
+      "source": "/assets/:path*",
+      "destination": "/api/legacy?path=assets/:path*"
+    },
+    {
+      "source": "/system/:path*",
+      "destination": "/api/legacy?path=system/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}

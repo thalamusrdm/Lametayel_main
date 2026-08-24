@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.vercel/
+.env
+.env.*
+!.env.example
+
+# Local visual QA captures
+/source-home-desktop.png
+/implementation-home-desktop.png
+/implementation-home-mobile.png
+/implementation-purchase-clean.png
+/qa-home-desktop-comparison.png
