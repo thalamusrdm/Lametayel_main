@@ -9,6 +9,106 @@ import {
 
 const OLD_SITE = "https://insurance.lametayel.co.il";
 const PURCHASE_URL = "/legacy/buy/step1";
+const SITE_ORIGIN = "https://lametayel-main.vercel.app";
+
+function setMeta(name, content, attribute = "name") {
+  if (!content) return;
+  let element = document.head.querySelector(`meta[${attribute}="${name}"]`);
+  if (!element) {
+    element = document.createElement("meta");
+    element.setAttribute(attribute, name);
+    document.head.appendChild(element);
+  }
+  element.setAttribute("content", content);
+}
+
+function usePageMetadata({ title, description, path, image, article, faq = [], keywords = [], sources = [] }) {
+  useEffect(() => {
+    const canonicalUrl = `${SITE_ORIGIN}${path}`;
+    const imageUrl = image ? `${SITE_ORIGIN}${image}` : `${SITE_ORIGIN}/brand/lametayel-logo.png`;
+    const pageType = article ? "article" : "website";
+
+    document.title = title;
+    document.documentElement.lang = "he";
+    setMeta("description", description);
+    setMeta("robots", "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1");
+    setMeta("og:locale", "he_IL", "property");
+    setMeta("og:type", pageType, "property");
+    setMeta("og:title", title, "property");
+    setMeta("og:description", description, "property");
+    setMeta("og:url", canonicalUrl, "property");
+    setMeta("og:image", imageUrl, "property");
+    setMeta("twitter:card", "summary_large_image");
+    setMeta("twitter:title", title);
+    setMeta("twitter:description", description);
+    setMeta("twitter:image", imageUrl);
+    if (keywords.length) setMeta("keywords", keywords.join(", "));
+    if (article?.dateModified) setMeta("article:modified_time", article.dateModified, "property");
+
+    let canonical = document.head.querySelector('link[rel="canonical"]');
+    if (!canonical) {
+      canonical = document.createElement("link");
+      canonical.setAttribute("rel", "canonical");
+      document.head.appendChild(canonical);
+    }
+    canonical.setAttribute("href", canonicalUrl);
+
+    const breadcrumb = {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "דף הבית", item: SITE_ORIGIN },
+        { "@type": "ListItem", position: 2, name: "מידע שימושי", item: `${SITE_ORIGIN}/info` },
+        { "@type": "ListItem", position: 3, name: title.replace(/ \| למטייל ביטוח$/, ""), item: canonicalUrl },
+      ],
+    };
+    const mainEntity = article ? {
+      "@type": "BlogPosting",
+      headline: article.headline,
+      description,
+      image: [imageUrl],
+      datePublished: article.datePublished,
+      dateModified: article.dateModified,
+      inLanguage: "he-IL",
+      mainEntityOfPage: canonicalUrl,
+      author: { "@type": "Organization", name: "צוות התוכן של למטייל ביטוח", url: `${SITE_ORIGIN}/aboutus` },
+      publisher: {
+        "@type": "Organization",
+        name: "למטייל סוכנות לביטוח (1993) בע״מ",
+        url: SITE_ORIGIN,
+        logo: { "@type": "ImageObject", url: `${SITE_ORIGIN}/brand/lametayel-logo.png` },
+      },
+      keywords: keywords.join(", "),
+      citation: sources.map((source) => source.href),
+    } : {
+      "@type": "WebPage",
+      name: title,
+      description,
+      url: canonicalUrl,
+      inLanguage: "he-IL",
+      primaryImageOfPage: image ? { "@type": "ImageObject", url: imageUrl } : undefined,
+    };
+    const graph = [mainEntity, breadcrumb];
+    if (faq.length) {
+      graph.push({
+        "@type": "FAQPage",
+        mainEntity: faq.map((item) => ({
+          "@type": "Question",
+          name: item.question,
+          acceptedAnswer: { "@type": "Answer", text: item.answer },
+        })),
+      });
+    }
+
+    let structuredData = document.getElementById("page-structured-data");
+    if (!structuredData) {
+      structuredData = document.createElement("script");
+      structuredData.id = "page-structured-data";
+      structuredData.type = "application/ld+json";
+      document.head.appendChild(structuredData);
+    }
+    structuredData.textContent = JSON.stringify({ "@context": "https://schema.org", "@graph": graph });
+  }, [article, description, faq, image, keywords, path, sources, title]);
+}
 
 const navItems = [
   ["רכישת ביטוח", "/buy/step1"],
@@ -38,7 +138,16 @@ function Header() {
       <div className="header-accent" />
       <div className="header-inner">
         <a className="brand" href="/" aria-label="למטייל ביטוח - דף הבית"><img src="/brand/lametayel-logo.png" alt="למטייל ביטוח" /></a>
-        <button className="menu-button" type="button" aria-expanded={open} aria-controls="main-navigation" onClick={() => setOpen(!open)}>{open ? "סגירה" : "תפריט"}</button>
+        <button
+          className={open ? "menu-button is-open" : "menu-button"}
+          type="button"
+          aria-label={open ? "סגירת תפריט" : "פתיחת תפריט"}
+          aria-expanded={open}
+          aria-controls="main-navigation"
+          onClick={() => setOpen(!open)}
+        >
+          <span aria-hidden="true">{open ? "×" : "☰"}</span>
+        </button>
         <nav id="main-navigation" className={open ? "main-nav is-open" : "main-nav"}>
           {navItems.map(([label, href]) => <a key={label} href={href} onClick={() => setOpen(false)}>{label}</a>)}
         </nav>
@@ -78,14 +187,17 @@ function HomePage() {
       <section className="bottom-cta"><h2>יוצאים לחו״ל? אנחנו כאן בשבילכם</h2><a className="primary-cta compact" href="/buy/step1">לרכישת ביטוח</a></section>
     </main>
     <Footer /><ServiceCard />
-    {cookies && <aside className="cookie-banner" aria-label="הודעת עוגיות"><p>באתר נעשה שימוש בקבצי Cookies. המשך הגלישה מהווה הסכמה לשימוש זה.</p><button type="button" onClick={() => setCookies(false)}>אישור</button></aside>}
+    {cookies && <aside className="cookie-banner" aria-label="הודעת עוגיות"><p>האתר משתמש בקובצי עוגיות. המשך הגלישה מהווה הסכמה.</p><button type="button" onClick={() => setCookies(false)}>אישור</button></aside>}
   </>;
 }
 
 function InfoHubPage() {
-  useEffect(() => {
-    document.title = "מידע שימושי | למטייל ביטוח";
-  }, []);
+  usePageMetadata({
+    title: "מידע שימושי ומדריכי ביטוח נסיעות | למטייל ביטוח",
+    description: "מדריכי ביטוח נסיעות, פרטי פוליסות, מידע למשפחות ולמטיילים ושירות למבוטחי למטייל ביטוח.",
+    path: "/info",
+    image: "/article-images/travel-planning.jpg",
+  });
 
   return <div className="content-site-page">
     <Header />
@@ -107,11 +219,14 @@ function InfoHubPage() {
             {section.paths.map((path, cardIndex) => {
               const meta = pageMeta[path];
               return <a className="info-card" href={path} key={path}>
+                <span className="info-card-image"><img src={meta.image} alt="" loading="lazy" /></span>
                 <span className="info-card-index">{String(cardIndex + 1).padStart(2, "0")}</span>
-                <p>{meta.eyebrow}</p>
-                <h3>{meta.label}</h3>
-                <span className="info-card-summary">{meta.summary}</span>
-                <strong>לקריאה</strong>
+                <span className="info-card-body">
+                  <span className="info-card-eyebrow">{meta.eyebrow}</span>
+                  <h3>{meta.label}</h3>
+                  <span className="info-card-summary">{meta.summary}</span>
+                  <strong>לקריאה</strong>
+                </span>
               </a>;
             })}
           </div>
@@ -209,6 +324,28 @@ function AppDownloadLinks() {
   </div>;
 }
 
+function ArticleFaq({ items }) {
+  if (!items?.length) return null;
+  return <section className="article-faq" aria-labelledby="article-faq-title">
+    <h2 id="article-faq-title">שאלות נפוצות</h2>
+    <div className="article-faq-list">
+      {items.map((item) => <article className="article-faq-item" key={item.question}>
+        <h3>{item.question}</h3>
+        <p>{item.answer}</p>
+      </article>)}
+    </div>
+  </section>;
+}
+
+function ArticleSources({ sources }) {
+  if (!sources?.length) return null;
+  return <section className="article-sources" aria-labelledby="article-sources-title">
+    <h2 id="article-sources-title">מקורות ועדכון מידע</h2>
+    <p>המידע נבדק מול המקורות הרשמיים הבאים. תנאי הפוליסה ודף פרטי הביטוח שנמסרו למבוטח הם המחייבים.</p>
+    <ul>{sources.map((source) => <li key={source.href}><a href={source.href} target="_blank" rel="noreferrer">{source.label}</a></li>)}</ul>
+  </section>;
+}
+
 function prepareContentBlocks(path, blocks) {
   if (path !== "/family") return blocks;
 
@@ -237,19 +374,38 @@ function ContentPage({ path, page }) {
     .filter((block) => block.type === "heading" && block.level === 2 && block.text.length < 100)
     .slice(0, 8);
 
-  useEffect(() => {
-    document.title = `${title} | למטייל ביטוח`;
-  }, [title]);
+  const seoTitle = meta.seoTitle || `${title} | למטייל ביטוח`;
+  const isBlogArticle = /^\/blog\/blog\d+$/.test(path);
+  usePageMetadata({
+    title: seoTitle,
+    description: meta.seoDescription || meta.summary,
+    path,
+    image: meta.image,
+    article: isBlogArticle ? {
+      headline: title,
+      datePublished: meta.datePublished,
+      dateModified: meta.dateModified,
+    } : null,
+    faq: page.faq,
+    keywords: meta.keywords,
+    sources: page.sources,
+  });
 
   return <div className={`content-site-page content-accent-${meta.accent || "default"}`}>
     <Header />
     <main className="content-main">
       <section className="content-hero">
-        <div className="section-shell">
-          <nav className="breadcrumbs" aria-label="פירורי לחם"><a href="/">דף הבית</a><span>/</span><a href="/info">מידע שימושי</a></nav>
-          <p className="eyebrow">{meta.eyebrow || "מידע למטייל"}</p>
-          <h1>{title}</h1>
-          <p className="content-hero-summary">{meta.summary}</p>
+        <div className="content-hero-inner section-shell">
+          <div className="content-hero-copy">
+            <nav className="breadcrumbs" aria-label="פירורי לחם"><a href="/">דף הבית</a><span>/</span><a href="/info">מידע שימושי</a></nav>
+            <p className="eyebrow">{meta.eyebrow || "מידע למטייל"}</p>
+            <h1>{title}</h1>
+            <p className="content-hero-summary">{meta.summary}</p>
+          </div>
+          {meta.image && <figure className="content-hero-media">
+            <img src={meta.image} alt={meta.imageAlt || ""} />
+            <figcaption>צילום המחשה</figcaption>
+          </figure>}
         </div>
       </section>
 
@@ -258,10 +414,16 @@ function ContentPage({ path, page }) {
 
       <div className="content-layout section-shell">
         <article className={`content-article ${meta.legal ? "legal-content" : ""}`}>
+          {meta.updatedAt && <div className="article-byline">
+            <strong>צוות התוכן של למטייל ביטוח</strong>
+            <span>עודכן לאחרונה: <time dateTime={meta.dateModified}>{meta.updatedAt}</time></span>
+          </div>}
           {meta.special === "contact"
             ? <ContactPanel />
             : contentBlocks.map((block, index) => <ContentBlock block={block} page={page} blockIndex={index} key={`${block.type}-${index}`} />)}
 
+          <ArticleFaq items={page.faq} />
+          <ArticleSources sources={page.sources} />
           {meta.appLinks && <AppDownloadLinks />}
           {meta.sourceAction && <a className="content-source-action" href={page.finalUrl} target="_blank" rel="noreferrer">{meta.sourceAction}</a>}
         </article>
@@ -291,6 +453,7 @@ function PurchasePage() {
   const [loaded, setLoaded] = useState(false);
   const [cleaned, setCleaned] = useState(false);
   const [frameHeight, setFrameHeight] = useState(null);
+  const [currentStep, setCurrentStep] = useState(1);
 
   const handleFrameLoad = (event) => {
     const frame = event.currentTarget;
@@ -300,6 +463,10 @@ function PurchasePage() {
       const doc = frame.contentDocument;
       const main = doc?.querySelector("main");
       if (!doc || !main) return;
+
+      const embeddedPath = frame.contentWindow?.location?.pathname || "";
+      const embeddedStep = embeddedPath.match(/step[-/]?(\d+)/i)?.[1];
+      if (embeddedStep) setCurrentStep(Math.min(6, Math.max(1, Number(embeddedStep))));
 
       let cleanupStyles = doc.getElementById("embedded-purchase-cleanup");
       if (!cleanupStyles) {
@@ -342,6 +509,17 @@ function PurchasePage() {
     <div className="purchase-page">
       <Header />
       <main className="purchase-main">
+        <nav className="purchase-progress" aria-label="שלבי רכישת הביטוח">
+          <ol>
+            {Array.from({ length: 6 }, (_, index) => {
+              const step = index + 1;
+              return <li className={step === currentStep ? "is-current" : step < currentStep ? "is-complete" : ""} key={step} aria-current={step === currentStep ? "step" : undefined}>
+                <span>{step}</span>
+                <small>שלב {step}</small>
+              </li>;
+            })}
+          </ol>
+        </nav>
         <div className={frameClass} style={frameHeight ? { height: `${frameHeight}px` } : undefined}>
           {!loaded && <div className="frame-loader">טוענים את טופס הרכישה…</div>}
           <iframe

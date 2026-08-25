@@ -7,6 +7,13 @@
       "maxDuration": 30
     }
   },
+  "redirects": [
+    {
+      "source": "/blog/blog4",
+      "destination": "/blog",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/legacy/:path*",
@@ -27,6 +34,26 @@
     {
       "source": "/buy/:path*",
       "destination": "/api/legacy?path=buy/:path*"
+    },
+    {
+      "source": "/blog",
+      "destination": "/seo/blog.html"
+    },
+    {
+      "source": "/blog/blog1",
+      "destination": "/seo/blog/blog1.html"
+    },
+    {
+      "source": "/blog/blog2",
+      "destination": "/seo/blog/blog2.html"
+    },
+    {
+      "source": "/blog/blog3",
+      "destination": "/seo/blog/blog3.html"
+    },
+    {
+      "source": "/blog/blog5",
+      "destination": "/seo/blog/blog5.html"
     },
     {
       "source": "/assets/:path*",

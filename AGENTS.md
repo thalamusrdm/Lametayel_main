@@ -8,6 +8,8 @@ Before making substantial visual changes, use the Product Design plugin's `get-c
 
 - The legacy purchase wizard must feel like a native page inside the new site shell. Show only the legacy form content; hide its header, introductory title block, support strip, cookie banner, and footer so those elements are not duplicated.
 - Informational content from the legacy insurance site should live on local routes inside the new site shell. Keep only transactional legacy systems as clearly labeled external or proxied destinations.
+- Content and information pages should read like credible editorial articles: use a strong, locally hosted documentary-style lead image that matches the topic, and reuse the same visual language in information-center cards without decorative clutter or third-party hotlinks.
+- Insurance guides must be maintained as current, source-backed editorial content: lead with a direct answer, show the review date and official sources, avoid unconditional coverage claims, expose useful FAQs, and ship route-specific prerendered metadata/content for SEO and answer engines. Remove obsolete event-specific articles instead of keeping them as archives.
 
 When implementing from a selected generated mock, treat that image as the source of truth for layout, component anatomy, density, spacing, color, typography, visible content, and hierarchy.
 

@@ -41,6 +41,27 @@ test("falls back to index.html for an unknown app route", async () => {
   assert.deepEqual(calls, ["/flow/step-two?source=share", "/index.html"]);
 });
 
+test("serves the prerendered SEO entry point for an article route", async () => {
+  const calls = [];
+  const response = await worker.fetch(
+    new Request("https://example.test/blog/blog3", { headers: { accept: "text/html" } }),
+    {
+      ASSETS: {
+        fetch: async (request) => {
+          const pathname = new URL(request.url).pathname;
+          calls.push(pathname);
+          return new Response(pathname === "/seo/blog/blog3.html" ? "article" : "missing", {
+            status: pathname === "/seo/blog/blog3.html" ? 200 : 404,
+          });
+        },
+      },
+    },
+  );
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(calls, ["/seo/blog/blog3.html"]);
+});
+
 test("does not turn missing API or write requests into the app shell", async () => {
   for (const request of [
     new Request("https://example.test/api/missing", { headers: { accept: "application/json" } }),
@@ -65,4 +86,9 @@ test("emits the files required by Sites packaging", async () => {
   await access(new URL("../dist/client/index.html", import.meta.url));
   await access(new URL("../dist/server/index.js", import.meta.url));
   await access(new URL("../dist/.openai/hosting.json", import.meta.url));
+  await access(new URL("../dist/client/seo/blog.html", import.meta.url));
+  await access(new URL("../dist/client/seo/blog/blog1.html", import.meta.url));
+  await access(new URL("../dist/client/seo/blog/blog2.html", import.meta.url));
+  await access(new URL("../dist/client/seo/blog/blog3.html", import.meta.url));
+  await access(new URL("../dist/client/seo/blog/blog5.html", import.meta.url));
 });

@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /legacy/
+Disallow: /wizard/
+
+Sitemap: https://lametayel-main.vercel.app/sitemap.xml
